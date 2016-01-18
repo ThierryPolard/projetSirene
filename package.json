@@ -1,0 +1,23 @@
+{
+  "name": "vizlyre",
+  "version": "1.0.0",
+  "description": "A small visualization project for Lyre",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "browserify index.js -o browserify-bundle.js -d -v",
+    "watch": "watchify index.js -o browserify-bundle.js -d -v"
+  },
+  "author": "ants <contact@ants.builders> (http://ants.builders/)",
+  "license": "ISC",
+  "dependencies": {
+    "browserify": "^13.0.0",
+    "csv-parse": "^1.0.1",
+    "geojson": "^0.2.1",
+    "leaflet": "^0.7.7",
+    "mapbox-gl": "^0.12.3"
+  },
+  "devDependencies": {
+    "watchify": "^3.7.0"
+  }
+}

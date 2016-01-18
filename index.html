@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="fr">
+    <head>
+        <meta charset="utf-8">
+
+        <meta name="description" content="Un projet de démo pour le Lyre">
+        
+        <meta name="apple-mobile-web-app-capable" content="yes">
+        <meta name="mobile-web-app-capable" content="yes">
+        
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        
+        <link rel="stylesheet" media="screen" href="./css/normalize.css" />
+        <link rel="stylesheet" media="screen" href="./css/default.css" />
+        <!-- <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v0.12.3/mapbox-gl.css' rel='stylesheet' /> -->
+        <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet/v0.7.7/leaflet.css" />
+
+        <style>
+            body { margin:0; padding:0; position:absolute; top:0; bottom:0; width:100%; }
+            #map { position:absolute; top:0; bottom:0; width:100%; height: 100%;}
+        </style>
+
+        <script defer src="browserify-bundle.js"></script>
+
+        <title> Viz Lyre </title>
+
+    </head>
+
+    <body>
+        <div id='map'></div>
+    </body>
+</html>
