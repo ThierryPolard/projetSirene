@@ -2,7 +2,6 @@
 
 // var mapboxgl = require('mapbox-gl');
 var L = require('leaflet');
-
 var token = 'pk.eyJ1IjoiYW50aGlsbCIsImEiOiJUR0FoRGdJIn0.ZygA4KxIt8hJ1LAvPPMHwQ';
 
 var map = L.map('map', {
