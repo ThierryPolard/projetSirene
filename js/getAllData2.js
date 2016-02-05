@@ -4,19 +4,13 @@ var fs = require('fs'); //natif node system file read and write in file
 var parse = require('csv-parse'); //read line by line csv file
 var geojson = require('geojson'); //package json write geoJson in the right way
 var path = require('path'); //
-
-
 var parser2 = parse({delimiter: ';', columns: true});
 
-// var geoData = [];
+
 var idToSites = new Map();
 var idToParam = new Map();
 var idToData  = new Map();
 
-
-
-// idToData.set(key, value);
-// idToData.get(key);
 
 var getSitesP  = new Promise(function(resolve, reject){
 	var parser = parse({delimiter: ';', columns: true});
@@ -33,7 +27,7 @@ var getSitesP  = new Promise(function(resolve, reject){
 	})
 	.on('end', function(){
 		resolve(idToData)
-		console.log('idToData',idToData)
+		console.log ('idToData',idToData)
 	})
 	.on('error', function(error){
 		reject(error)
@@ -43,7 +37,6 @@ var getSitesP  = new Promise(function(resolve, reject){
 
 var getParamP = new Promise(function(resolve,reject){
 	var parser = parse({delimiter: ';', columns: true});
-
 	var fileFullName = path.join(__dirname,'../data/param.csv');
 	var inputParam = fs.createReadStream(fileFullName); //open stream to file
 
@@ -62,21 +55,22 @@ var getParamP = new Promise(function(resolve,reject){
 		}
 	})
 	.on('end', function(){
-		resolve(idToParam);
+		resolve(idToParam)
+		console.log('idToParam ',idToParam )
 	})
 	.on('error', function(error){
 		reject(error);
 	})
 });
 
-console.log('getParamP ',getParamP )
-
 var idToAllData = new Map();
+
 Promise.all([getSitesP,getParamP])
 .then(function(results){
 	var geo=results[0];
-	var param=results[1];
-		
+	var oxygene=results[1];
+	var conductivite=results[2];
+	console.log(geoData)
 	geo.forEach(function(geoData,ID){
 		idToAllData.set(ID,{
 			coords : geoData,
@@ -98,23 +92,4 @@ idToAllData.forEach(function(data,ID){
 		coords:data.coords,
 		ParamByDate: dateOutput
 	};
-})
-
-console.log('finalOutput',finalOutput )
-
-
-var fileFullName = path.join(__dirname,'../data/allData.json');
-fs.writeFile(fileFullName,JSON.stringify(finalOutput));
-})
-.catch(function(err){
-	console.log('error',err);
 });
-
-
-
-
-//ou 
-
-//data = [{ name: 'location', coords: [85, 34] }];
-//GeoJSON.parse(data, {Point: 'coords'});
-

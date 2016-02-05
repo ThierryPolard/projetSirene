@@ -27,12 +27,19 @@ var circle = L.circle([44.79, -0.5742], 100, {
 })
 .addTo(map);
 
-
-//var convert = require ('./js/convertToGeojson.js');
-
-
 var myLayer = L.geoJson().addTo(map);
-myLayer.addData('.js/geoData');
+myLayer.addData('.js/allData');
+
+var monGeoJSON = geoData;
+var myLayer = L.geoJson(monGeoJSON);  // je crée une layer de type GeoJSON
+myLayer.addTo(map); // j'ajoute ma layer à ma map
+
+
+
+//var myLayer = L.geoJson().addTo(map);
+//myLayer.addData('.js/geoData');
 
 //L.geoJson(geojsonFeature).
 //addTo(map);
+
+//var convert = require ('./js/convertToGeojson.js');
