@@ -56,55 +56,63 @@ var getOxygeneP = new Promise(function(resolve,reject){
 	})
 });
 
-
-
-
-
 var idToAllData = new Map();
-
 Promise.all([getGeoP,getOxygeneP])
 .then(function(results){
 	var geo=results[0];
 	var oxygene=results[1];
-	geo.forEach(function(geoData,Id){
-		idToAllData.set(Id,{
+	geo.forEach(function(geoData,ID){
+		idToAllData.set(ID,{
 			coords : geoData,
-			dateTooxygene : oxygene.get(Id)
+			dateToOxygeneByDate : oxygene.get(ID)
 		});
 	});
 	console.log(idToAllData.size);
 	var finalOutput  = {};
-idToAllData.forEach(function(data,Id){
+idToAllData.forEach(function(data,ID){
 	var dateOutput = [];
-	 data.dateTooxygene.forEach(function(oxygene,date){
+	 data.dateToOxygeneByDate.forEach(function(oxygene,date){
 	 	dateOutput.push({
 	 		date:date,
 	 		oxygene:oxygene
 	 	});
 	})
-	finalOutput[Id] = {
+	finalOutput[ID] = {
 		coords:data.coords,
-		oxygeneByDate: dateOutput
+		OxygeneByDateByDate: dateOutput
 	};
 })
 
-console.log('finalOutput',finalOutput)
-
-fs.writeFile('../data/allData3.json',JSON.stringify(finalOutput));
+fs.writeFile('../data/allData4.json',JSON.stringify(finalOutput));
 })
 .catch(function(err){
 	console.log('error',err);
 });
 
 
-
-var myJSON = require('../data/allData3.json');
-// Transformation en Objet JS
-//var datas = JSON.parse( myJSON );
-
-console.log('myJSON',myJSON)
-
-var myJSON = require('../data/allData3.json');
+console.log('finalOutput',finalOutput);
 
 
-var MyGeoJSON = GeoJSON.parse(myJSON, {Point: 'coords', include:  ['Id'], exclude : ['oxygeneByDate']});
+var finalOutput2 = [];
+
+//finalOutput.forEach(function(Id, coords, OxygeneByDate ){
+//   finalOutput2.push({
+//  	 name: Id,
+//  	 coords:coords,
+//   	 OxygeneByDate : OxygeneByDate
+//   });
+//});
+
+
+
+//var MyGeoJSON = GeoJSON.parse(finalOutput2, {Point: 'coords'});
+
+
+
+//var myJSON = require('../data/allData4.json');
+//console.log('myJSON',myJSON);
+
+
+//var fichierendur = JSON.stringify(MyGeoJSON); // je convertis mon objetJSON en texte pur pour pouvoir l'écrire dans un fichier
+
+//fs.writeFile('MyGeoJSON4.geojson', fichierendur );
