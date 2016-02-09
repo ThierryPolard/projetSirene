@@ -19,7 +19,7 @@ var getGeoP = new Promise(function(resolve, reject){
 		// var coord = [];
 		// coord.push(data.lat);
 		// coord.push(data.lon);
-		idToData.set(data.Id,[data.lat,data.lon]);
+		idToData.set(data.Id,[data.lon,data.lat]);
 	})
 	.on('end', function(){
 		resolve(idToData)
@@ -94,4 +94,3 @@ Promise.all([getGeoP,getOxygeneP])
 .catch(function(err){
 	console.log('error',err);
 });
-
