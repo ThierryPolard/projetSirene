@@ -1,28 +1,18 @@
 'use strict'
 
-var fs = require('fs'); //natif node system file read and write in file
+var fs=require('fs'); //natif node system file read and write in file
 var parse = require('csv-parse'); //read line by line csv file
-var geojson = require('geojson'); //package json write geoJson in the right way
-var path = require('path'); //
+var GeoJSON = require('geojson'); //package json write geoJson in the right way
 
 
-var parser2 = parse({delimiter: ';', columns: true});
-
-// var geoData = [];
-var idToSites = new Map();
-var idToParam = new Map();
-var idToData  = new Map();
+var idToData = new Map();
+var idToOxygene = new Map();
 
 
 
-// idToData.set(key, value);
-// idToData.get(key);
-
-var getSitesP  = new Promise(function(resolve, reject){
+var getGeoP = new Promise(function(resolve, reject){
 	var parser = parse({delimiter: ';', columns: true});
-
-	var fileFullName = path.join(__dirname,'../data/sites.csv');
-	var input  = fs.createReadStream(fileFullName); //open stream to file
+	var input = fs.createReadStream('../data/sites.csv'); //open stream to file
 
 	input.pipe(parser)
 	.on('data', function(data){
@@ -40,81 +30,68 @@ var getSitesP  = new Promise(function(resolve, reject){
 	});
 });
 
-
-var getParamP = new Promise(function(resolve,reject){
+var getOxygeneP = new Promise(function(resolve,reject){
 	var parser = parse({delimiter: ';', columns: true});
+	var inputOxygene = fs.createReadStream('../data/param.csv'); //open stream to file
 
-	var fileFullName = path.join(__dirname,'../data/param.csv');
-	var inputParam = fs.createReadStream(fileFullName); //open stream to file
-
-	inputParam.pipe(parser)
+	inputOxygene.pipe(parser)
 	.on('data', function(data){
-
-		if(idToParam.has(data.Id)){
-			var myEntry = idToParam.get(data.Id)
+		if(idToOxygene.has(data.Id)){
+			var myEntry = idToOxygene.get(data.Id)
 			myEntry.set(data.temps,data.oxygene);
-			idToParam.set(data.Id,myEntry);
+			idToOxygene.set(data.Id,myEntry);
 		}
 		else{
 			var NewMap = new Map();
 			NewMap.set(data.temps,data.oxygene)
-			idToParam.set(data.Id,NewMap);
+			idToOxygene.set(data.Id,NewMap);
 		}
 	})
 	.on('end', function(){
-		resolve(idToParam);
+		resolve(idToOxygene);
+		console.log('idToOxygene',idToOxygene)
 	})
 	.on('error', function(error){
 		reject(error);
 	})
 });
 
-console.log('getParamP ',getParamP )
-
 var idToAllData = new Map();
-Promise.all([getSitesP,getParamP])
+Promise.all([getGeoP,getOxygeneP])
 .then(function(results){
 	var geo=results[0];
-	var param=results[1];
-		
-	geo.forEach(function(geoData,ID){
-		idToAllData.set(ID,{
+	var oxygene=results[1];
+	geo.forEach(function(geoData,Id){
+		idToAllData.set(Id,{
 			coords : geoData,
-			dateToParam : param.get(ID)
+			dateToOxygeneByDate : oxygene.get(Id)
 		});
 	});
 	console.log(idToAllData.size);
-	var finalOutput  = {};
-idToAllData.forEach(function(data,ID){
-	var dateOutput = [];
+	var finalOutput  = [];
+	idToAllData.forEach(function(data,Id){
+		var dateOutput = [];
+		 data.dateToOxygeneByDate.forEach(function(oxygene,date){
+		 	dateOutput.push({
+		 		date:date,
+		 		oxygene:oxygene
+		 	});
+		});
+		finalOutput.push({
+			Id:Id,
+			coords:data.coords,
+			OxygeneByDate: dateOutput
+		});
+	});
 
-	 data.dateToParam.forEach(function(param,date){
-	 	dateOutput.push({
-	 		date:date,
-	 		param:param
-	 	});
-	})
-	finalOutput[ID] = {
-		coords:data.coords,
-		ParamByDate: dateOutput
-	};
-})
+//console.log('finalOutput',finalOutput);
+//console.log('OxygeneByDate',OxygeneByDate);
 
-console.log('finalOutput',finalOutput )
-
-
-var fileFullName = path.join(__dirname,'../data/allData.json');
-fs.writeFile(fileFullName,JSON.stringify(finalOutput));
+	fs.writeFile('../data/allData.json',JSON.stringify(finalOutput));
+	var MyGeoJSON = GeoJSON.parse(finalOutput, {Point: 'coords'});
+	console.log('MyGeoJSON',MyGeoJSON);
 })
 .catch(function(err){
 	console.log('error',err);
 });
-
-
-
-
-//ou 
-
-//data = [{ name: 'location', coords: [85, 34] }];
-//GeoJSON.parse(data, {Point: 'coords'});
 
