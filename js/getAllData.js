@@ -6,7 +6,7 @@ var GeoJSON = require('geojson'); //package json write geoJson in the right way
 
 
 var idToData = new Map();
-var idToOxygene = new Map();
+var idToParam = new Map();
 
 
 
@@ -19,7 +19,7 @@ var getGeoP = new Promise(function(resolve, reject){
 		// var coord = [];
 		// coord.push(data.lat);
 		// coord.push(data.lon);
-		idToData.set(data.Id,[data.lon,data.lat]);
+		idToData.set(data.Id,[parseFloat(data.lat), parseFloat(data.lon)]);
 	})
 	.on('end', function(){
 		resolve(idToData)
@@ -36,20 +36,26 @@ var getOxygeneP = new Promise(function(resolve,reject){
 
 	inputOxygene.pipe(parser)
 	.on('data', function(data){
-		if(idToOxygene.has(data.Id)){
-			var myEntry = idToOxygene.get(data.Id)
-			myEntry.set(data.temps,data.oxygene);
-			idToOxygene.set(data.Id,myEntry);
+		if(idToParam.has(data.Id)){
+			var myEntry = idToParam.get(data.Id)
+			myEntry.set(data.temps,{
+				oxygene: parseFloat(data.oxygene),
+				conduct: parseFloat(data.conductivity)
+			});
+			idToParam.set(data.Id,myEntry);
 		}
 		else{
 			var NewMap = new Map();
-			NewMap.set(data.temps,data.oxygene)
-			idToOxygene.set(data.Id,NewMap);
+			NewMap.set(data.temps,{
+				oxygene: parseFloat(data.oxygene),
+				conduct: parseFloat(data.conductivity)
+			})
+			idToParam.set(data.Id,NewMap);
 		}
 	})
 	.on('end', function(){
-		resolve(idToOxygene);
-		console.log('idToOxygene',idToOxygene)
+		resolve(idToParam);
+		console.log('idToParam',idToParam)
 	})
 	.on('error', function(error){
 		reject(error);
@@ -60,36 +66,32 @@ var idToAllData = new Map();
 Promise.all([getGeoP,getOxygeneP])
 .then(function(results){
 	var geo=results[0];
-	var oxygene=results[1];
+	var param=results[1];
 	geo.forEach(function(geoData,Id){
 		idToAllData.set(Id,{
 			coords : geoData,
-			dateToOxygeneByDate : oxygene.get(Id)
+			dateToParamByDate : param.get(Id)
 		});
 	});
 	console.log(idToAllData.size);
 	var finalOutput  = [];
 	idToAllData.forEach(function(data,Id){
 		var dateOutput = [];
-		 data.dateToOxygeneByDate.forEach(function(oxygene,date){
+		 data.dateToParamByDate.forEach(function(param,date){
+		 	console.log('PARAM', param);
 		 	dateOutput.push({
 		 		date:date,
-		 		oxygene:oxygene
+		 		param:param
 		 	});
 		});
 		finalOutput.push({
 			Id:Id,
 			coords:data.coords,
-			OxygeneByDate: dateOutput
+			paramByDate: dateOutput
 		});
 	});
 
-//console.log('finalOutput',finalOutput);
-//console.log('OxygeneByDate',OxygeneByDate);
-
 	fs.writeFile('../data/allData.json',JSON.stringify(finalOutput));
-	var MyGeoJSON = GeoJSON.parse(finalOutput, {Point: 'coords'});
-	console.log('MyGeoJSON',MyGeoJSON);
 })
 .catch(function(err){
 	console.log('error',err);
